@@ -4,6 +4,37 @@ import Text from "./Text";
 import { View, TextInput, Pressable, StyleSheet } from "react-native";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-native";
+import useSignIn from "../hooks/useSignIn";
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "white",
+    padding: 15,
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+  },
+  button: (isBothFilled) => ({
+    alignItems: "center",
+    backgroundColor: isBothFilled ? "royalblue" : "#DDDDDD",
+    padding: 10,
+    marginHorizontal: 12,
+    borderRadius: 4,
+  }),
+  error: {
+    color: "#d73a4a",
+    marginBottom: 10,
+    marginHorizontal: 12,
+  },
+  alert: {
+    color: "green",
+    textAlign: "center",
+    margin: 12,
+  },
+});
 
 const validationSchema = yup.object().shape({
   username: yup
@@ -17,63 +48,57 @@ const validationSchema = yup.object().shape({
 });
 
 const SignIn = () => {
-  const [showAlert, setShowAlert] = useState(false);
+  const [showSuccess, setshowSuccess] = useState(false);
+  const [error, setError] = useState();
+  const [signIn] = useSignIn();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (showAlert) {
+    if (showSuccess) {
       const timer = setTimeout(() => {
-        setShowAlert(false);
+        setshowSuccess(false);
         navigate("/repositories/");
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [showAlert, navigate]);
+  }, [showSuccess, navigate]);
 
-  const styles = StyleSheet.create({
-    container: {
-      backgroundColor: "white",
-      padding: 15,
-    },
-    input: {
-      height: 40,
-      margin: 12,
-      borderWidth: 1,
-      padding: 10,
-    },
-    button: (isBothFilled) => ({
-      alignItems: "center",
-      backgroundColor: isBothFilled ? "royalblue" : "#DDDDDD",
-      padding: 10,
-      marginHorizontal: 12,
-      borderRadius: 4,
-    }),
-    error: {
-      color: "#d73a4a",
-      marginBottom: 10,
-      marginHorizontal: 12,
-    },
-    alert: {
-      color: "green",
-      textAlign: "center",
-      margin: 12,
-    },
-  });
+  const onSubmit = async (values) => {
+    const { username, password } = values;
+
+    try {
+      const { data } = await signIn({ username, password });
+      if (data?.authenticate?.accessToken) {
+        setshowSuccess(true);
+        setError(null);
+      }
+    } catch (e) {
+      console.log(e);
+      setError(e?.message);
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+      setshowSuccess(false);
+    }
+  };
 
   const formik = useFormik({
     initialValues: { username: "", password: "" },
     validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      setShowAlert(true);
-      formik.resetForm();
-    },
+    onSubmit: (values) => onSubmit(values),
     validateOnChange: false,
     validateOnBlur: false,
   });
 
   const isBothFilled = formik.values.username && formik.values.password;
+
+  const handleError = (field) => {
+    if (formik.touched[field] && formik.errors[field]) {
+      return <Text style={styles.error}>{formik.errors[field]}</Text>;
+    }
+    return null;
+  };
 
   return (
     <View style={styles.container}>
@@ -83,9 +108,7 @@ const SignIn = () => {
         value={formik.values.username}
         placeholder="Username"
       />
-      {formik.touched.username && formik.errors.username && (
-        <Text style={styles.error}>{formik.errors.username}</Text>
-      )}
+      {handleError("username")}
       <TextInput
         style={styles.input}
         onChangeText={formik.handleChange("password")}
@@ -93,18 +116,17 @@ const SignIn = () => {
         placeholder="Password"
         secureTextEntry
       />
-      {formik.touched.password && formik.errors.password && (
-        <Text style={styles.error}>{formik.errors.password}</Text>
-      )}
+      {handleError("password")}
       <Pressable
         style={styles.button(isBothFilled)}
         onPress={formik.handleSubmit}
       >
         <Text>Sign in</Text>
       </Pressable>
-      {showAlert && (
+      {showSuccess && (
         <Text style={styles.alert}>Sign in successful! Redirecting...</Text>
       )}
+      {error && <Text style={[styles.error, { marginTop: 10 }]}>{error}</Text>}
     </View>
   );
 };

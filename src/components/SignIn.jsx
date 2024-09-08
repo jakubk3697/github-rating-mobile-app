@@ -63,7 +63,7 @@ const SignIn = () => {
 
   const formik = useFormik({
     initialValues: { username: "", password: "" },
-    validationSchema: validationSchema,
+    validationSchema,
     onSubmit: (values) => {
       console.log(values);
       setShowAlert(true);

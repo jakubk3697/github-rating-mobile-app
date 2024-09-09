@@ -58,6 +58,7 @@ const roundNumber = (number) => {
 const RepositoryItem = ({ item }) => {
   const stargazersCount = roundNumber(item.stargazersCount);
   const forksCount = roundNumber(item.forksCount);
+
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
@@ -81,7 +82,7 @@ const RepositoryItem = ({ item }) => {
         </View>
         <View style={styles.statItem}>
           <Text>Reviews:</Text>
-          <Text style={styles.statText}>{item.reviewCount}</Text>
+          <Text style={styles.statText}>{item.reviews.totalCount}</Text>
         </View>
         <View style={styles.statItem}>
           <Text>Rating:</Text>

@@ -5,7 +5,6 @@ import { View, TextInput, Pressable, StyleSheet } from "react-native";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-native";
 import useSignIn from "../hooks/useSignIn";
-import AuthStorage from "../utils/authStorage";
 
 const styles = StyleSheet.create({
   container: {

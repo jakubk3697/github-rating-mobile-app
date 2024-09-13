@@ -3,19 +3,26 @@ import { gql } from "@apollo/client";
 export const GET_REPOSITORIES = gql`
   query {
     repositories {
+      totalCount
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        endCursor
+        startCursor
+      }
       edges {
         node {
-          ownerAvatarUrl
+          id
           fullName
           description
           language
-          stargazersCount
           forksCount
-          reviews {
-            totalCount
-          }
+          stargazersCount
           ratingAverage
+          reviewCount
+          ownerAvatarUrl
         }
+        cursor
       }
     }
   }

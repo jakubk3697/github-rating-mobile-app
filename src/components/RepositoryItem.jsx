@@ -60,33 +60,49 @@ const RepositoryItem = ({ item }) => {
   const forksCount = roundNumber(item.forksCount);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="repositoryItem">
       <View style={styles.topContainer}>
-        <Image style={styles.image} source={{ uri: item.ownerAvatarUrl }} />
+        <Image
+          style={styles.image}
+          source={{ uri: item.ownerAvatarUrl }}
+          testID="avatarImage"
+        />
         <View style={styles.infoContainer}>
-          <Text fontWeight="bold" style={styles.fullName}>
+          <Text fontWeight="bold" style={styles.fullName} testID="fullName">
             {item.fullName}
           </Text>
-          <Text style={styles.description}>{item.description}</Text>
-          <Text style={styles.language}>{item.language}</Text>
+          <Text style={styles.description} testID="description">
+            {item.description}
+          </Text>
+          <Text style={styles.language} testID="language">
+            {item.language}
+          </Text>
         </View>
       </View>
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <Text>Stars:</Text>
-          <Text style={styles.statText}>{stargazersCount}</Text>
+          <Text style={styles.statText} testID="stargazersCount">
+            {stargazersCount}
+          </Text>
         </View>
         <View style={styles.statItem}>
           <Text>Forks:</Text>
-          <Text style={styles.statText}>{forksCount}</Text>
+          <Text style={styles.statText} testID="forksCount">
+            {forksCount}
+          </Text>
         </View>
         <View style={styles.statItem}>
           <Text>Reviews:</Text>
-          <Text style={styles.statText}>{item.reviews.totalCount}</Text>
+          <Text style={styles.statText} testID="reviewCount">
+            {item.reviewCount}
+          </Text>
         </View>
         <View style={styles.statItem}>
           <Text>Rating:</Text>
-          <Text style={styles.statText}>{item.ratingAverage}</Text>
+          <Text style={styles.statText} testID="ratingAverage">
+            {item.ratingAverage}
+          </Text>
         </View>
       </View>
     </View>

@@ -47,6 +47,53 @@ const validationSchema = yup.object().shape({
     .required("Password is required"),
 });
 
+export const SignInContainer = ({
+  formik,
+  isBothFilled,
+  showSuccess,
+  error,
+}) => {
+  const handleError = (field) => {
+    if (formik.touched[field] && formik.errors[field]) {
+      return <Text style={styles.error}>{formik.errors[field]}</Text>;
+    }
+    return null;
+  };
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        onChangeText={formik.handleChange("username")}
+        value={formik.values.username}
+        placeholder="Username"
+        testID="username"
+      />
+      {handleError("username")}
+      <TextInput
+        style={styles.input}
+        onChangeText={formik.handleChange("password")}
+        value={formik.values.password}
+        placeholder="Password"
+        secureTextEntry
+        testID="password"
+      />
+      {handleError("password")}
+      <Pressable
+        style={styles.button(isBothFilled)}
+        onPress={formik.handleSubmit}
+        testID="signIn"
+      >
+        <Text>Sign in</Text>
+      </Pressable>
+      {showSuccess && (
+        <Text style={styles.alert}>Sign in successful! Redirecting...</Text>
+      )}
+      {error && <Text style={[styles.error, { marginTop: 10 }]}>{error}</Text>}
+    </View>
+  );
+};
+
 const SignIn = () => {
   const [showSuccess, setshowSuccess] = useState(false);
   const [error, setError] = useState();
@@ -93,41 +140,14 @@ const SignIn = () => {
 
   const isBothFilled = formik.values.username && formik.values.password;
 
-  const handleError = (field) => {
-    if (formik.touched[field] && formik.errors[field]) {
-      return <Text style={styles.error}>{formik.errors[field]}</Text>;
-    }
-    return null;
-  };
-
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        onChangeText={formik.handleChange("username")}
-        value={formik.values.username}
-        placeholder="Username"
-      />
-      {handleError("username")}
-      <TextInput
-        style={styles.input}
-        onChangeText={formik.handleChange("password")}
-        value={formik.values.password}
-        placeholder="Password"
-        secureTextEntry
-      />
-      {handleError("password")}
-      <Pressable
-        style={styles.button(isBothFilled)}
-        onPress={formik.handleSubmit}
-      >
-        <Text>Sign in</Text>
-      </Pressable>
-      {showSuccess && (
-        <Text style={styles.alert}>Sign in successful! Redirecting...</Text>
-      )}
-      {error && <Text style={[styles.error, { marginTop: 10 }]}>{error}</Text>}
-    </View>
+    <SignInContainer
+      onSubmit={onSubmit}
+      formik={formik}
+      showSuccess={showSuccess}
+      error={error}
+      isBothFilled={isBothFilled}
+    />
   );
 };
 

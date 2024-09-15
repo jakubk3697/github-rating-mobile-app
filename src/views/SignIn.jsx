@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as yup from "yup";
-import Text from "./Text";
+import Text from "../components/Text";
 import { View, TextInput, Pressable, StyleSheet } from "react-native";
 import { useFormik } from "formik";
 import { useNavigate } from "react-router-native";
@@ -43,7 +43,7 @@ const validationSchema = yup.object().shape({
     .required("Username is required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(3, "Password must be at least 3 characters")
     .required("Password is required"),
 });
 

@@ -35,6 +35,10 @@ const AppBar = () => {
     navigate("/", { replace: true });
   };
 
+  const addReview = () => {
+    navigate("/reviews/add", { replace: true });
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView horizontal>
@@ -45,15 +49,27 @@ const AppBar = () => {
         </Pressable>
 
         {data?.me ? (
-          <Pressable onPress={signOut}>
-            <Text style={styles.pressableText}>Sign out</Text>
-          </Pressable>
+          <>
+            <Pressable onPress={addReview}>
+              <Text style={styles.pressableText}>Create a review</Text>
+            </Pressable>
+            <Pressable onPress={signOut}>
+              <Text style={styles.pressableText}>Sign out</Text>
+            </Pressable>
+          </>
         ) : (
-          <Pressable>
-            <Link to="/signin">
-              <Text style={styles.pressableText}>Sign in</Text>
-            </Link>
-          </Pressable>
+          <>
+            <Pressable>
+              <Link to="/signup">
+                <Text style={styles.pressableText}>Sign Up</Text>
+              </Link>
+            </Pressable>
+            <Pressable>
+              <Link to="/signin">
+                <Text style={styles.pressableText}>Sign In</Text>
+              </Link>
+            </Pressable>
+          </>
         )}
       </ScrollView>
     </View>

@@ -1,9 +1,10 @@
 import React from "react";
-import { useParams } from "react-router-native";
-import { useQuery } from "@apollo/client";
+import { useParams, useNavigate } from "react-router-native";
+import { useQuery, useMutation } from "@apollo/client";
 import { GET_REPOSITORY } from "../graphql/queries";
+import { DELETE_REVIEW } from "../graphql/mutations";
 import RepositoryItem from "./RepositoryItem";
-import { View, StyleSheet, Text, FlatList } from "react-native";
+import { View, StyleSheet, Text, FlatList, Button, Alert } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -40,7 +41,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
-  username: {
+  nameText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#000",
@@ -55,6 +56,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
   },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 10,
+  },
+  viewReviewBtn: {
+    backgroundColor: "#0366d6",
+    color: "#fff",
+  },
+  deleteReviewBtn: {
+    backgroundColor: "#d73a4a",
+    color: "#fff",
+  },
+  buttonText: {
+    color: "#fff",
+    padding: 10,
+  },
 });
 
 const formatDate = (date) => {
@@ -68,21 +86,73 @@ const formatDate = (date) => {
   return formattedDate;
 };
 
-const ReviewItem = ({ item }) => {
-  const { user, createdAt, rating, text } = item.node;
+export const ReviewItem = ({ buttons = false, item, refetch }) => {
+  const { id, user, createdAt, rating, text, repository } = item.node;
   const formattedDate = formatDate(createdAt);
+  const navigate = useNavigate();
+  const [deleteReview] = useMutation(DELETE_REVIEW);
+
+  const triggerAlert = (deleteReviewId) =>
+    Alert.alert(
+      "Delete review",
+      "Are you sure you want to delete this review?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        { text: "Delete", onPress: () => handleDeleteReview(deleteReviewId) },
+      ]
+    );
+
+  const handleDeleteReview = async (deleteReviewId) => {
+    try {
+      const response = await deleteReview({
+        variables: {
+          deleteReviewId,
+        },
+      });
+
+      if (!response?.data?.deleteReview) {
+        throw new Error("Failed to delete review. Please try again.");
+      }
+
+      if (refetch) {
+        await refetch();
+      }
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      Alert.alert("Error", "Failed to delete review. Please try again.");
+    }
+  };
 
   return (
-    <View style={styles.reviewContainer}>
-      <View style={styles.reviewItemBox}>
-        <View style={styles.ratingContainer}>
-          <Text style={styles.ratingText}>{rating}</Text>
-        </View>
-        <View style={styles.contentContainer}>
-          <Text style={styles.username}>{user.username}</Text>
-          <Text style={styles.date}>{formattedDate}</Text>
-          <Text style={styles.reviewText}>{text}</Text>
-        </View>
+    <View style={styles.reviewItemBox}>
+      <View style={styles.ratingContainer}>
+        <Text style={styles.ratingText}>{rating}</Text>
+      </View>
+      <View style={styles.contentContainer}>
+        {user?.username ? (
+          <Text style={styles.nameText}>{user.username}</Text>
+        ) : (
+          <Text style={styles.nameText}>{repository.fullName}</Text>
+        )}
+        <Text style={styles.date}>{formattedDate}</Text>
+        <Text style={styles.reviewText}>{text}</Text>
+        {buttons && (
+          <View style={styles.buttonContainer}>
+            <Button
+              title="View Repository"
+              onPress={() => navigate(`/repository/${repository?.id}`)}
+              color="#0366d6"
+            />
+            <Button
+              title="Delete Review"
+              onPress={() => triggerAlert(id)}
+              color="#d73a4a"
+            />
+          </View>
+        )}
       </View>
     </View>
   );

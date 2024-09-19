@@ -4,7 +4,7 @@ import Constants from "expo-constants";
 import theme from "../theme";
 import { Link } from "react-router-native";
 import { useQuery, useApolloClient } from "@apollo/client";
-import { ME } from "../graphql/queries";
+import { GET_CURRENT_USER } from "../graphql/queries";
 import useAuthStorage from "../hooks/useAuthStorage";
 import { useNavigate } from "react-router-native";
 
@@ -24,7 +24,9 @@ const styles = StyleSheet.create({
 });
 
 const AppBar = () => {
-  const { data } = useQuery(ME);
+  const { data } = useQuery(GET_CURRENT_USER, {
+    variables: { includeReviews: false },
+  });
   const authStorage = useAuthStorage();
   const apolloClient = useApolloClient();
   const navigate = useNavigate();
@@ -37,6 +39,10 @@ const AppBar = () => {
 
   const addReview = () => {
     navigate("/reviews/add", { replace: true });
+  };
+
+  const getMyReviews = () => {
+    navigate("/myreviews", { replace: true });
   };
 
   return (
@@ -52,6 +58,9 @@ const AppBar = () => {
           <>
             <Pressable onPress={addReview}>
               <Text style={styles.pressableText}>Create a review</Text>
+            </Pressable>
+            <Pressable onPress={getMyReviews}>
+              <Text style={styles.pressableText}>My reviews</Text>
             </Pressable>
             <Pressable onPress={signOut}>
               <Text style={styles.pressableText}>Sign out</Text>

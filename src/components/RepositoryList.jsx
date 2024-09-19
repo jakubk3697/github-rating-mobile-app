@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { FlatList, View, StyleSheet, Text } from "react-native";
 import RepositoryItem from "./RepositoryItem";
 import useRepositoriess from "../hooks/useRepositories";
+import { Picker } from "@react-native-picker/picker";
+import { Searchbar } from "react-native-paper";
+import { useDebounce } from "use-debounce";
 
 const styles = StyleSheet.create({
   separator: {
@@ -12,26 +16,81 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  searchInput: {
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  picker: {
+    backgroundColor: "#f0f0f0",
+    marginBottom: 16,
+  },
 });
 
 const ItemSeparator = () => <View style={styles.separator} />;
 
-export const RepositoryListContainer = ({ repositories }) => {
+export const RepositoryListContainer = ({
+  repositories,
+  onOrderChange,
+  orderBy,
+  orderDirection,
+  searchKeyword,
+  onSearchChange,
+}) => {
   const repositoryNodes = repositories
     ? repositories?.edges.map((edge) => edge.node)
     : [];
 
   return (
-    <FlatList
-      data={repositoryNodes}
-      ItemSeparatorComponent={ItemSeparator}
-      renderItem={({ item }) => <RepositoryItem item={item} />}
-    />
+    <>
+      <Searchbar
+        placeholder="Search"
+        onChangeText={onSearchChange}
+        value={searchKeyword}
+        style={styles.searchInput}
+      />
+      <Picker
+        selectedValue={`${orderBy}:${orderDirection}`}
+        onValueChange={(itemValue) => {
+          const [newOrderBy, newOrderDirection] = itemValue.split(":");
+          onOrderChange(newOrderBy, newOrderDirection);
+        }}
+        style={styles.picker}
+      >
+        <Picker.Item label="Latest repositories" value="CREATED_AT:DESC" />
+        <Picker.Item
+          label="Highest rated repositories"
+          value="RATING_AVERAGE:DESC"
+        />
+        <Picker.Item
+          label="Lowest rated repositories"
+          value="RATING_AVERAGE:ASC"
+        />
+      </Picker>
+      <FlatList
+        data={repositoryNodes}
+        ItemSeparatorComponent={ItemSeparator}
+        renderItem={({ item }) => <RepositoryItem item={item} />}
+      />
+    </>
   );
 };
 
 const RepositoryList = () => {
-  const { repositories, error, loading } = useRepositoriess();
+  const [orderBy, setOrderBy] = useState("CREATED_AT");
+  const [orderDirection, setOrderDirection] = useState("DESC");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [debouncedKeyword] = useDebounce(searchKeyword, 1000);
+
+  const { repositories, error, loading } = useRepositoriess(
+    orderBy,
+    orderDirection,
+    debouncedKeyword
+  );
+
+  const handleOrderChange = (newOrderBy, newOrderDirection) => {
+    setOrderBy(newOrderBy);
+    setOrderDirection(newOrderDirection);
+  };
 
   if (loading) {
     return (
@@ -52,8 +111,11 @@ const RepositoryList = () => {
   return (
     <RepositoryListContainer
       repositories={repositories}
-      error={error}
-      loading={loading}
+      onOrderChange={handleOrderChange}
+      orderBy={orderBy}
+      orderDirection={orderDirection}
+      searchKeyword={searchKeyword}
+      onSearchChange={setSearchKeyword}
     />
   );
 };

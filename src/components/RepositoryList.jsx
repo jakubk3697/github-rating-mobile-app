@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FlatList, View, StyleSheet, Text } from "react-native";
 import RepositoryItem from "./RepositoryItem";
-import useRepositoriess from "../hooks/useRepositories";
+import useRepositories from "../hooks/useRepositories";
 import { Picker } from "@react-native-picker/picker";
 import { Searchbar } from "react-native-paper";
 import { useDebounce } from "use-debounce";
@@ -35,6 +35,7 @@ export const RepositoryListContainer = ({
   orderDirection,
   searchKeyword,
   onSearchChange,
+  onEndReach,
 }) => {
   const repositoryNodes = repositories
     ? repositories?.edges.map((edge) => edge.node)
@@ -70,6 +71,7 @@ export const RepositoryListContainer = ({
         data={repositoryNodes}
         ItemSeparatorComponent={ItemSeparator}
         renderItem={({ item }) => <RepositoryItem item={item} />}
+        onEndReached={onEndReach}
       />
     </>
   );
@@ -81,11 +83,16 @@ const RepositoryList = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedKeyword] = useDebounce(searchKeyword, 1000);
 
-  const { repositories, error, loading } = useRepositoriess(
+  const { repositories, fetchMore, error, loading } = useRepositories({
+    first: 4,
     orderBy,
     orderDirection,
-    debouncedKeyword
-  );
+    searchKeyword: debouncedKeyword,
+  });
+
+  const onEndReach = () => {
+    fetchMore();
+  };
 
   const handleOrderChange = (newOrderBy, newOrderDirection) => {
     setOrderBy(newOrderBy);
@@ -116,6 +123,7 @@ const RepositoryList = () => {
       orderDirection={orderDirection}
       searchKeyword={searchKeyword}
       onSearchChange={setSearchKeyword}
+      onEndReach={onEndReach}
     />
   );
 };

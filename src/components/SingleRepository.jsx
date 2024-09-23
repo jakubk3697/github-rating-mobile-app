@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-native";
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_REPOSITORY } from "../graphql/queries";
+import useRepository from "../hooks/useRepository";
 import { DELETE_REVIEW } from "../graphql/mutations";
 import RepositoryItem from "./RepositoryItem";
 import { View, StyleSheet, Text, FlatList, Button, Alert } from "react-native";
@@ -160,9 +160,14 @@ export const ReviewItem = ({ buttons = false, item, refetch }) => {
 
 const SingleRepository = () => {
   const { id } = useParams();
-  const { loading, error, data } = useQuery(GET_REPOSITORY, {
-    variables: { id },
+  const { data, error, loading, fetchMore } = useRepository({
+    id,
+    first: 3,
   });
+
+  const onEndReach = () => {
+    fetchMore();
+  };
 
   if (loading) {
     return (
@@ -187,6 +192,7 @@ const SingleRepository = () => {
         data={data.repository.reviews.edges}
         renderItem={({ item }) => <ReviewItem item={item} />}
         keyExtractor={(item) => item.node.id.toString()}
+        onEndReached={onEndReach}
       />
     </View>
   );
